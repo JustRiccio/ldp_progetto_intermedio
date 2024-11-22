@@ -4,15 +4,14 @@
 
 int main()
 {
-	LidarDriver::LidarDriver a = LidarDriver::LidarDriver();
+	LidarDriver::LidarDriver a = new LidarDriver::LidarDriver();
 	
-	std::vector<double> lettura;
-	for(...)
+	std::vector<double> lettura = std::vector<double>();
+	for(int i = 0; i < 3 ; i++)
 	{
 		
 	}
-	new_scan();
+	a.new_scan(lettura);
 	
 	return 0;
 }
-//qui è passato cesco
