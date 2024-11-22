@@ -59,7 +59,7 @@ std::vector<double> LidarDriver::get_scan()
 {
 	//ritorna la scansione piu' vecchia e la rimuove dal buffer
 	std::vector<std::vector<double>> tmp = std::vector<std::vector<double>>(BUFFER_DIM);
-	std::vector<double> tmp = matrix[0];
+	std::vector<double> last_scan = matrix[0];
 	for(int i = 0; i < cont; i++)
 	{
 		tmp[i] = matrix[i];
@@ -68,6 +68,7 @@ std::vector<double> LidarDriver::get_scan()
 	{
 		matrix[i] = tmp[i+1];
 	}
+	return last_scan;
 }
 
 void LidarDriver::clear_buffer()
