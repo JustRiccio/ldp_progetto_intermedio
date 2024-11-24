@@ -1,10 +1,11 @@
-#include "LidarDriver.h"
+#include "include/LidarDriver.h"
 #include <iostream>
 #include <vector>
 
 LidarDriver::LidarDriver()
 {
-	std::vector<std::vector<double>> matrix = std::vector<std::vector<double>>(BUFFER_DIM);
+	matrix = std::vector<std::vector<double> >(BUFFER_DIM);
+	cont = 0;
 }
 
 void LidarDriver::new_scan(std::vector<double> array)
@@ -17,7 +18,9 @@ void LidarDriver::new_scan(std::vector<double> array)
 		{
 			matrix[i] = matrix[i+1];
 		}
+		cont--;
 	}
+	cont++;
 	matrix.push_back(array);
 }
 
@@ -25,7 +28,7 @@ std::vector<double> LidarDriver::check_array(std::vector<double> array)
 {
 	if(array.size() > get_element_number())
 	{
-		std::vector<double> tmp = std::vector<double>(get_element_number());
+		std::vector<double> tmp(get_element_number());
 		for(int i = 0; i < get_element_number(); i++)
 		{
 			tmp[i] = array[i];
@@ -34,7 +37,7 @@ std::vector<double> LidarDriver::check_array(std::vector<double> array)
 	}
 	else if(array.size() < get_element_number())
 	{
-		std::vector<double> tmp = std::vector<double>(get_element_number());
+		std::vector<double> tmp(get_element_number());
 		for(int i = 0; i < array.size() ; i++){
 			tmp[i] = array[i];
 		}
@@ -58,7 +61,7 @@ int LidarDriver::get_element_number()
 std::vector<double> LidarDriver::get_scan()
 {
 	//ritorna la scansione piu' vecchia e la rimuove dal buffer
-	std::vector<std::vector<double>> tmp = std::vector<std::vector<double>>(BUFFER_DIM);
+	std::vector<std::vector<double> > tmp(BUFFER_DIM);
 	std::vector<double> last_scan = matrix[0];
 	for(int i = 0; i < cont; i++)
 	{
@@ -68,11 +71,18 @@ std::vector<double> LidarDriver::get_scan()
 	{
 		matrix[i] = tmp[i+1];
 	}
+	cont--;
+	/*
+	Invece che usare un vettore tmp forse si potrebbe semplicemente
+	settare l'ultimo elemento a 0 che mi pare sia il valore di inizializzazione di default
+	*/
 	return last_scan;
 }
 
 void LidarDriver::clear_buffer()
 {
+	std::vector<std::vector<double> > cleared(BUFFER_DIM); 
+	matrix = cleared;
 	//elimina tutte le scansioni senza ritornarle
 	//uguale al costruttore, forse da modificare il delete()
 }
@@ -80,7 +90,7 @@ void LidarDriver::clear_buffer()
 double LidarDriver::get_distance(double angle)
 {
 	if (cont == 0){
-		std::cout<<"Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezzione
+		std::cout<<"Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezione
 		return 0;
 	}
 	std::vector<double> tmp = matrix[cont];
@@ -102,8 +112,8 @@ double LidarDriver::get_distance(double angle)
 	}
 }
 
-/*friend std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
+std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
 {
 	
-}*/
+}
 
