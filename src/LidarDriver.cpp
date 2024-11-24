@@ -1,10 +1,15 @@
-#include "include/LidarDriver.h"
+#include "LidarDriver.h"
 #include <iostream>
 #include <vector>
 
-LidarDriver::LidarDriver()
+// non ho idea se questo sia il modo corretto di implementare il costruttore che
+// istanzia anche la matrice, pero' cosi' compila anche impostando resolution a const,
+// mentre non compila se resolution = res lo inserisco dentro le graffe
+LidarDriver::LidarDriver(double res) : resolution(res)
 {
-	matrix = std::vector<std::vector<double> >(BUFFER_DIM);
+	matrix = std::vector<std::vector<double> >();
+	// se non ho capito male cont sta facendo da dimensione logica.
+	// in quel caso si puo' tranquillamente eliminare e ad ogni sua occorrenza rimpiazzarlo con un matrix.size()
 	cont = 0;
 }
 
@@ -81,8 +86,8 @@ std::vector<double> LidarDriver::get_scan()
 
 void LidarDriver::clear_buffer()
 {
-	std::vector<std::vector<double> > cleared(BUFFER_DIM); 
-	matrix = cleared;
+	matrix = std::vector<std::vector<double> >();
+	cont = 0;
 	//elimina tutte le scansioni senza ritornarle
 	//uguale al costruttore, forse da modificare il delete()
 }
@@ -114,6 +119,15 @@ double LidarDriver::get_distance(double angle)
 
 std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
 {
-	
+	if (ld.matrix.size() == 0){
+		stream << "Non sono presenti scansioni salvate" << "\n";
+	}
+	else{
+		for (double value: ld.matrix[0]){
+			stream << value << " ";
+		}
+		stream << "\n";
+	}
+	return stream;
 }
 
