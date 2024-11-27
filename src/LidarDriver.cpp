@@ -2,46 +2,48 @@
 #include <iostream>
 #include <vector>
 
-// non ho idea se questo sia il modo corretto di implementare il costruttore che
-// istanzia anche la matrice, pero' cosi' compila anche impostando resolution a const,
-// mentre non compila se resolution = res lo inserisco dentro le graffe
 LidarDriver::LidarDriver(double res) : resolution(res)
 {
-	matrix = std::vector<std::vector<double> >();
+	matrix = std::vector<std::vector<double>>();
 }
 
 void LidarDriver::new_scan(std::vector<double> array)
 {
 	array = check_array(array);
-	
 	if (matrix.size() == BUFFER_DIM)
 	{
-		for(int i = 0; i < BUFFER_DIM-1; i++)
+		for (int i = 0; i < BUFFER_DIM - 1; i++)
 		{
-			matrix[i] = matrix[i+1];
+			matrix[i] = matrix[i + 1];
 		}
+		matrix[matrix.size() - 1] = array;
 	}
-	matrix.push_back(array);
+	else
+	{
+		matrix.push_back(array);
+	}
 }
 
 std::vector<double> LidarDriver::check_array(std::vector<double> array)
 {
-	if(array.size() > get_element_number())
+	int element_number = get_element_number();
+	if (array.size() > element_number)
 	{
-		std::vector<double> tmp(get_element_number());
-		for(int i = 0; i < get_element_number(); i++)
+		std::vector<double> tmp(element_number);
+		for (int i = 0; i < element_number; i++)
 		{
 			tmp[i] = array[i];
 		}
 		return tmp;
 	}
-	else if(array.size() < get_element_number())
+	else if (array.size() < element_number)
 	{
-		std::vector<double> tmp(get_element_number());
-		for(int i = 0; i < array.size() ; i++){
+		std::vector<double> tmp(element_number);
+		for (int i = 0; i < array.size(); i++)
+		{
 			tmp[i] = array[i];
 		}
-		for(int j = array.size(); j < get_element_number(); j++)
+		for (int j = array.size(); j < element_number; j++)
 		{
 			tmp[j] = 0;
 		}
@@ -55,79 +57,79 @@ std::vector<double> LidarDriver::check_array(std::vector<double> array)
 
 int LidarDriver::get_element_number()
 {
-	return (DEGREES/resolution)+1;
+	return (DEGREES / resolution) + 1;
 }
 
 std::vector<double> LidarDriver::get_scan()
 {
-	//ritorna la scansione piu' vecchia e la rimuove dal buffer
-	std::vector<std::vector<double> > tmp(BUFFER_DIM);
+	if (matrix.size() == 0)
+	{
+		// soluzione migliore sarebbe un'eccezione
+		return std::vector<double>();
+	}
+
 	std::vector<double> last_scan = matrix[0];
-	for(int i = 0; i < matrix.size(); i++)
+	for (int i = 0; i < matrix.size() - 1; ++i)
 	{
-		tmp[i] = matrix[i];
+		matrix[i] = matrix[i + 1];
 	}
-	for(int i = 0; i < matrix.size()-1; i++)
-	{
-		matrix[i] = tmp[i+1];
-	}
-	/*
-	Invece che usare un vettore tmp forse si potrebbe semplicemente
-	settare l'ultimo elemento a 0 che mi pare sia il valore di inizializzazione di default
-	*/
+	matrix.pop_back();
+
 	return last_scan;
 }
 
 void LidarDriver::clear_buffer()
 {
-	matrix = std::vector<std::vector<double> >();
-	//elimina tutte le scansioni senza ritornarle
-	//uguale al costruttore, forse da modificare il delete()
+	matrix = std::vector<std::vector<double>>();
 }
 
 double LidarDriver::get_distance(double angle)
 {
-	if (matrix.size() == 0){
-		std::cout<<"Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezione
+	if (matrix.size() == 0)
+	{
+		// soluzione migliore sarebbe un'eccezione
 		return 0;
 	}
-	std::vector<double> tmp = matrix[matrix.size()];
+
+	std::vector<double> tmp = matrix[matrix.size() - 1];
 	int i = 0;
-	//nel caso non sia presente l'angolo cercato prendo i due valori attorno al valore cercato
-	int lsinistro=0;
-	int ldestro=0;
-	while(i*resolution <= angle || i < tmp.size()-1){
-		lsinistro = i;
-		ldestro = i + 1;
+	// nel caso non sia presente l'angolo cercato prendo i due valori attorno al valore cercato
+	int left = 0;
+	int right = 1;
+	while (i * resolution <= angle && i < tmp.size() - 1)
+	{
+		left = i;
+		right = i + 1;
 		i++;
-	}	
-	//se ldestro e lsinistro sono uguali(non dovrebbe succedere)
-	if(abs(lsinistro - angle) <= abs(ldestro - angle)){ 
-		return tmp[lsinistro];
 	}
-	else{
-		return tmp[ldestro];
+
+	// se right e left sono uguali(non dovrebbe succedere)
+	if (angle - left*resolution <= right*resolution - angle) 
+	// ho dovuto rimuovere gli abs perche' troncavano tutto a int e 
+	// quindi non funzionavano. Non dovrebbero esserci problemi
+	// perche' left*resolution e' sempre <= angle, mentre right*resolution e' sempre >= angle
+	// sapendo che angle appartiene a [0, 180]
+	{
+		return tmp[left];
+	}
+	else
+	{
+		return tmp[right];
 	}
 }
 
-std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
+std::ostream &operator<<(std::ostream &stream, const LidarDriver &ld)
 {
-	if (ld.matrix.size() == 0){
-		stream << "Non sono presenti scansioni salvate" << "\n";
+	if (ld.matrix.size() == 0)
+	{
+		stream << "There are no saved scans" << std::endl;
 	}
-	else{
-		/*for (double value: ld.matrix[0]){
-			stream << value << " ";
-		}
-		stream << "\n";
-		*/
-		for(int i = 0; i < ld.matrix.size(); i++)
+	else
+	{
+		stream << "Last scan: ";
+		for (double value : ld.matrix[ld.matrix.size() - 1])
 		{
-			stream << std::endl << "Scansione " << i << std::endl;
-			for(int j = 0; j < (ld.DEGREES/ld.resolution)+1; j++)
-			{
-				stream << ld.matrix[i][j] << "  ";
-			}
+			stream << value << " ";
 		}
 		stream << std::endl;
 	}
