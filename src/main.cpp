@@ -36,15 +36,18 @@ std::vector<double> get_random_scan(int size)
     return output;
 }
 
+// Stampa a video le operazioni permesse all'utente.
+// Le operazioni permesse sono tutte quelle richieste piu'
+// la possibilita' di caricare una scansione senza dover 
+// inserire a mano tutti i valori dell'array
 int get_choice()
 {
-    std::cout << "\n1-Instantiate a new Driver";
-    std::cout << "\n2-Manual new scan";
-    std::cout << "\n3-Automatic new scan";
-    std::cout << "\n4-Get scan";
-    std::cout << "\n5-Clear buffer";
-    std::cout << "\n6-Get distance";
-    std::cout << "\n7-Print last scan";
+    std::cout << "\n1-Manual new scan";
+    std::cout << "\n2-Automatic new scan";
+    std::cout << "\n3-Get scan";
+    std::cout << "\n4-Clear buffer";
+    std::cout << "\n5-Get distance";
+    std::cout << "\n6-Print last scan";
     std::cout << "\n0-Exit";
     std::cout << "\nWaiting for input";
     std::cout << std::endl;
@@ -53,9 +56,17 @@ int get_choice()
     return choice;
 }
 
+// Funzione che emula un menu' che permette all'utente di interagire con un driver
 void test()
 {
-    LidarDriver ld = LidarDriver(1);
+    double resolution = 0;
+    while (resolution <= 0 or resolution > 1)
+    {
+        std::cout << "Resolution? (real number in ]0, 1])" << std::endl;
+        std::cin >> resolution;
+    }
+
+    LidarDriver ld = LidarDriver(resolution);
     int choice = -1;
 
     while (choice != 0)
@@ -70,29 +81,13 @@ void test()
         }
         case 1:
         {
-            double resolution = 0;
-            while (resolution <= 0 or resolution > 1)
-            {
-                std::cout << "Resolution? (real number in ]0, 1])" << std::endl;
-                std::cin >> resolution;
-            }
-
-            // per il momento non funziona.
-            // o si sistemano i costruttori o l'operatore =
-            // oppure si impone la scelta della resolution all'inizio
-            // e se uno vuole cambiare resolution deve riavviare il programma
-            // ld = LidarDriver(resolution);
-            break;
-        }
-        case 2:
-        {
             std::vector<double> scan;
             std::cout << "Type values (type 0 to stop)" << std::endl;
             double value = 1;
             std::cin >> value;
             // siccome i valori sono inseriti da utente non c'e' bisogno di implementare
             // l'uguaglianza tra double come abs(a-b) <= epsilon
-            while (int(value) != 0)
+            while (value != 0)
             {
                 scan.push_back(value);
                 std::cin >> value;
@@ -101,12 +96,12 @@ void test()
             ld.new_scan(scan);
             break;
         }
-        case 3:
+        case 2:
         {
             ld.new_scan(get_random_scan(ld.get_element_number()));
             break;
         }
-        case 4:
+        case 3:
         {
             std::vector<double> scan = ld.get_scan();
 
@@ -124,12 +119,12 @@ void test()
             }
             break;
         }
-        case 5:
+        case 4:
         {
             ld.clear_buffer();
             break;
         }
-        case 6:
+        case 5:
         {
             double angle = -1;
             while (angle < 0 or angle > 180)
@@ -147,7 +142,7 @@ void test()
             }
             break;
         }
-        case 7:
+        case 6:
         {
             std::cout << ld;
             break;

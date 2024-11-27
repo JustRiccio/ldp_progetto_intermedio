@@ -69,7 +69,6 @@ std::vector<double> LidarDriver::get_scan()
     if (matrix.empty())
     {
 		//Aggiungere eccezione
-		std::cout << "Non sono presenti scansioni" << std::endl;
         return std::vector<double>();
     }
 
@@ -91,7 +90,7 @@ void LidarDriver::clear_buffer()
 double LidarDriver::get_distance(double angle)
 {
 	if (matrix.size() == 0){
-		std::cout << "Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezione
+		//Aggiungere eccezione
 		return 0;
 	}
 	std::vector<double> tmp = matrix[matrix.size() - 1];
@@ -107,11 +106,12 @@ double LidarDriver::get_distance(double angle)
 	}
 
 	// se right e left sono uguali(non dovrebbe succedere)
-	if (angle - left*resolution <= right*resolution - angle) 
-	// ho dovuto rimuovere gli abs perche' troncavano tutto a int e 
-	// quindi non funzionavano. Non dovrebbero esserci problemi
+	// if (abs(left*resolution - angle) <= abs(right*resolution - angle))
+	// Ho dovuto rimuovere gli abs perche' troncavano tutto a int e 
+	// quindi non funzionavano. Non dovrebbero esserci problemi di termini < 0
 	// perche' left*resolution e' sempre <= angle, mentre right*resolution e' sempre >= angle
-	// sapendo che angle appartiene a [0, 180]
+	// avendo angle appartenente a [0, 180]
+	if (angle - left*resolution <= right*resolution - angle) 
 	{
 		return tmp[left];
 	}
