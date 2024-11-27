@@ -1,84 +1,56 @@
-#include "LidarDriver.h"
 #include <iostream>
-#include <vector>
+#include "LidarDriver.h"
 
-// funzione da eliminare, serve solo a generare numeri random per simulare delle letture
-/*
-#include <random>
-std::vector<double> test(int size){
-    std::vector<double> output;
+int main() {
+    // Inizializza il driver con una risoluzione di 1 grado
+    LidarDriver driver(1.0);
 
+    // Crea alcune scansioni di prova utilizzando il costruttore del vettore
+    std::vector<double> scan1;
+    scan1.push_back(1.0);
+    scan1.push_back(2.0);
+    scan1.push_back(3.0);
+    scan1.push_back(4.0);
+    scan1.push_back(5.0);
 
-    // codice preso da stackoverflow 
-    // https://stackoverflow.com/questions/2704521/generate-random-double-numbers-in-c risposta migliore
+    std::vector<double> scan2;
+    scan2.push_back(6.0);
+    scan2.push_back(7.0);
+    scan2.push_back(8.0);
+    scan2.push_back(9.0);
+    scan2.push_back(10.0);
 
-    double lower_bound = 0;
-    double upper_bound = 10;
-    std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
-    std::default_random_engine re;
+    std::vector<double> scan3;
+    scan3.push_back(11.0);
+    scan3.push_back(12.0);
+    scan3.push_back(13.0);
+    scan3.push_back(14.0);
+    scan3.push_back(15.0);
 
+    // Aggiungi le scansioni al buffer
+    driver.new_scan(scan1);
+    driver.new_scan(scan2);
+    driver.new_scan(scan3);
 
-    for (int i=0; i<size; i++){
-        double random_n = unif(re);
-        output.push_back(random_n);
-    }
+    // Stampa lo stato attuale del buffer
+    std::cout << driver;
 
-    return output;
-}
-*/
+    // Test della funzione get_distance con un angolo specifico
+    double angle = 2.0; // Angolo in gradi
+    double distance = driver.get_distance(angle);
+    std::cout << "Distanza all'angolo " << angle << ": " << distance << std::endl;
 
-int main()
-{
-    LidarDriver a = LidarDriver(1);
-
-    // Simula una lettura del Lidar
-    //std::vector<double> lettura = test(a.get_element_number());
-    std::vector<double> lettura;
-    for (int i = 0; i < 11; i++) { // Simula lettura 10 gradi 
-        lettura.push_back(i * 1.5);
-    }
-
-    // test del print << di un Lidar vuoto
-    std::cout << a;
-
-    // Nuova scansione
-    a.new_scan(lettura);
-
-    lettura.clear();
-    for (int i = 0; i < 6; i++) { // Simula lettura 10 gradi 
-        lettura.push_back(i * 1.3);
-    }
-    a.new_scan(lettura);
-
-    lettura.clear();
-    for (int i = 0; i < 15; i++) { // Simula lettura 10 gradi 
-        lettura.push_back(i * 1.7);
-    }
-    a.new_scan(lettura);
-
-    // test del print << di un Lidar
-    std::cout << a;
-
-    // Ottiene la scansione più vecchia e la stampa
-    std::vector<double> vecchia_scansione = a.get_scan();
-    std::cout << "Scansione piu' vecchia:\n";
-    for (double valore : vecchia_scansione) {
-        std::cout << valore << "  ";
+    // Ottieni e stampa la scansione più vecchia
+    std::vector<double> oldest_scan = driver.get_scan();
+    std::cout << "Scansione più vecchia rimossa dal buffer: ";
+    for (double d : oldest_scan) {
+        std::cout << d << " ";
     }
     std::cout << std::endl;
 
-    // Svuota il buffer
-    a.clear_buffer();
-
-    std::vector<double> b = a.get_scan();
-    std::cout << "Scansione piu' vecchia:\n";
-    for (double valore : b) {
-        std::cout << valore << "  ";
-    }
-    std::cout << std::endl;
-
-    // test del print << di un Lidar vuoto dopo un buffer clear
-    std::cout << a;
+    // Pulisce il buffer e verifica
+    driver.clear_buffer();
+    std::cout << "Buffer dopo la pulizia: " << driver;
 
     return 0;
 }

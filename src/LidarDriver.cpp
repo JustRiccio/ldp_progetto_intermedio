@@ -2,28 +2,30 @@
 #include <iostream>
 #include <vector>
 
-// non ho idea se questo sia il modo corretto di implementare il costruttore che
-// istanzia anche la matrice, pero' cosi' compila anche impostando resolution a const,
-// mentre non compila se resolution = res lo inserisco dentro le graffe
-LidarDriver::LidarDriver(double res) : resolution(res)
+// Costruttore con inizialiazzione di default del vettore delle scansioni vuoto
+LidarDriver::LidarDriver(double res) : resolution(res) {}
+
+// Inserisce una nuova scansione in coda al vettore.
+// In caso raggiunga la dimensione massima, viene eliminata la più vecchia, che si trova in testa,
+// viene shiftato il vettore di una posizione e rimpiazzata la scansione in coda.
+void LidarDriver::new_scan(const std::vector<double>& array)
 {
-	matrix = std::vector<std::vector<double> >();
+    std::vector<double> checked_array = check_array(array);
+
+    if (matrix.size() == BUFFER_DIM)
+    {
+        for (size_t i = 0; i < BUFFER_DIM - 1; i++)
+        {
+            matrix[i] = std::move(matrix[i + 1]);
+        }
+        matrix.pop_back();
+    }
+    matrix.push_back(checked_array);
 }
 
-void LidarDriver::new_scan(std::vector<double> array)
-{
-	array = check_array(array);
-	
-	if (matrix.size() == BUFFER_DIM)
-	{
-		for(int i = 0; i < BUFFER_DIM-1; i++)
-		{
-			matrix[i] = matrix[i+1];
-		}
-	}
-	matrix.push_back(array);
-}
-
+// Esegue un controllo sul numero di letture che sono state fatte dal LidarDriver, ottenendo un vettore sempre con la stessa dimensione data dalla sensibilità
+//  - Se il numero di letture è minore del previsto, il vettore viene completato con zeri.
+//  - Se il numero di letture è maggiore, viene troncato fino ad ottenere la lunghezza corretta.
 std::vector<double> LidarDriver::check_array(std::vector<double> array)
 {
 	if(array.size() > get_element_number())
@@ -53,45 +55,41 @@ std::vector<double> LidarDriver::check_array(std::vector<double> array)
 	}
 }
 
-int LidarDriver::get_element_number()
+// Restituisce il numero di letture per una scansione.
+int LidarDriver::get_element_number() const
 {
 	return (DEGREES/resolution)+1;
 }
 
+// 
 std::vector<double> LidarDriver::get_scan()
 {
-	//ritorna la scansione piu' vecchia e la rimuove dal buffer
-	std::vector<std::vector<double> > tmp(BUFFER_DIM);
-	std::vector<double> last_scan = matrix[0];
-	for(int i = 0; i < matrix.size(); i++)
-	{
-		tmp[i] = matrix[i];
-	}
-	for(int i = 0; i < matrix.size()-1; i++)
-	{
-		matrix[i] = tmp[i+1];
-	}
-	/*
-	Invece che usare un vettore tmp forse si potrebbe semplicemente
-	settare l'ultimo elemento a 0 che mi pare sia il valore di inizializzazione di default
-	*/
-	return last_scan;
+    if (matrix.empty())
+    {
+		std::cout << "Non sono presenti scansioni" << std::endl;
+        return std::vector<double>();
+    }
+
+    std::vector<double> last_scan = std::move(matrix.front());
+    // Rimuove la prima scansione e scala tutto
+	matrix.erase(matrix.begin());
+
+    return last_scan;
 }
 
+// Azzera il buffer del LidarDriver
 void LidarDriver::clear_buffer()
 {
-	matrix = std::vector<std::vector<double> >();
-	//elimina tutte le scansioni senza ritornarle
-	//uguale al costruttore, forse da modificare il delete()
+	matrix.clear();
 }
 
 double LidarDriver::get_distance(double angle)
 {
 	if (matrix.size() == 0){
-		std::cout<<"Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezione
+		std::cout << "Buffer vuoto";	//volendo si potrebbe gestire anche con un'eccezione
 		return 0;
 	}
-	std::vector<double> tmp = matrix[matrix.size()];
+	std::vector<double> tmp = matrix[matrix.size() - 1];
 	int i = 0;
 	//nel caso non sia presente l'angolo cercato prendo i due valori attorno al valore cercato
 	int lsinistro=0;
@@ -112,24 +110,17 @@ double LidarDriver::get_distance(double angle)
 
 std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
 {
-	if (ld.matrix.size() == 0){
-		stream << "Non sono presenti scansioni salvate" << "\n";
-	}
-	else{
-		/*for (double value: ld.matrix[0]){
-			stream << value << " ";
-		}
-		stream << "\n";
-		*/
-		for(int i = 0; i < ld.matrix.size(); i++)
-		{
-			stream << std::endl << "Scansione " << i << std::endl;
-			for(int j = 0; j < (ld.DEGREES/ld.resolution)+1; j++)
-			{
-				stream << ld.matrix[i][j] << "  ";
-			}
-		}
-		stream << std::endl;
-	}
-	return stream;
+	if (ld.matrix.empty())
+    {
+        return stream << "Non sono presenti scansioni salvate" << std::endl;
+    }
+
+    stream << "Ultima scansione:" << std::endl;
+    for (double value : ld.matrix.back())
+    {
+        stream << value << " ";
+    }
+    stream << std::endl;
+
+    return stream;
 }
