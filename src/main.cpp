@@ -3,6 +3,7 @@
 #include <vector>
 
 // funzione da eliminare, serve solo a generare numeri random per simulare delle letture
+/*
 #include <random>
 std::vector<double> test(int size){
     std::vector<double> output;
@@ -24,22 +25,35 @@ std::vector<double> test(int size){
 
     return output;
 }
+*/
 
 int main()
 {
-    LidarDriver a = LidarDriver(0.2);
+    LidarDriver a = LidarDriver(1);
 
     // Simula una lettura del Lidar
-    std::vector<double> lettura = test(a.get_element_number());
-    // std::vector<double> lettura;
-    // for (int i = 0; i < 10; i++) { // Simula 10 letture
-    //     lettura.push_back(i * 1.5);
-    // }
+    //std::vector<double> lettura = test(a.get_element_number());
+    std::vector<double> lettura;
+    for (int i = 0; i < 11; i++) { // Simula lettura 10 gradi 
+        lettura.push_back(i * 1.5);
+    }
 
     // test del print << di un Lidar vuoto
     std::cout << a;
 
     // Nuova scansione
+    a.new_scan(lettura);
+
+    lettura.clear();
+    for (int i = 0; i < 6; i++) { // Simula lettura 10 gradi 
+        lettura.push_back(i * 1.3);
+    }
+    a.new_scan(lettura);
+
+    lettura.clear();
+    for (int i = 0; i < 15; i++) { // Simula lettura 10 gradi 
+        lettura.push_back(i * 1.7);
+    }
     a.new_scan(lettura);
 
     // test del print << di un Lidar
@@ -49,15 +63,22 @@ int main()
     std::vector<double> vecchia_scansione = a.get_scan();
     std::cout << "Scansione piu' vecchia:\n";
     for (double valore : vecchia_scansione) {
-        std::cout << valore << " ";
+        std::cout << valore << "  ";
     }
-    std::cout << "\n";
+    std::cout << std::endl;
 
     // Svuota il buffer
     a.clear_buffer();
 
+    std::vector<double> b = a.get_scan();
+    std::cout << "Scansione piu' vecchia:\n";
+    for (double valore : b) {
+        std::cout << valore << "  ";
+    }
+    std::cout << std::endl;
+
     // test del print << di un Lidar vuoto dopo un buffer clear
-    std::cout << a;    
+    std::cout << a;
 
     return 0;
 }
