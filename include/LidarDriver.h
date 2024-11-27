@@ -7,8 +7,8 @@ class LidarDriver
 {
 	private:
 		std::vector<std::vector<double> > matrix;
-		static const int BUFFER_DIM = 10;
-		static const int DEGREES = 180;
+		static constexpr int BUFFER_DIM = 10;
+		static constexpr int DEGREES = 180;
 		const double resolution; // const perche' le specifiche richiedono che la risoluzione sia fissa per tutta la durata
 		// di vita dell'istanza di oggetto
 		

@@ -28,22 +28,24 @@ void LidarDriver::new_scan(const std::vector<double>& array)
 //  - Se il numero di letture è maggiore, viene troncato fino ad ottenere la lunghezza corretta.
 std::vector<double> LidarDriver::check_array(std::vector<double> array)
 {
-	if(array.size() > get_element_number())
+	int element_number = get_element_number();
+	if (array.size() > element_number)
 	{
-		std::vector<double> tmp(get_element_number());
-		for(int i = 0; i < get_element_number(); i++)
+		std::vector<double> tmp(element_number);
+		for (int i = 0; i < element_number; i++)
 		{
 			tmp[i] = array[i];
 		}
 		return tmp;
 	}
-	else if(array.size() < get_element_number())
+	else if (array.size() < element_number)
 	{
-		std::vector<double> tmp(get_element_number());
-		for(int i = 0; i < array.size() ; i++){
+		std::vector<double> tmp(element_number);
+		for (int i = 0; i < array.size(); i++)
+		{
 			tmp[i] = array[i];
 		}
-		for(int j = array.size(); j < get_element_number(); j++)
+		for (int j = array.size(); j < element_number; j++)
 		{
 			tmp[j] = 0;
 		}
@@ -58,7 +60,7 @@ std::vector<double> LidarDriver::check_array(std::vector<double> array)
 // Restituisce il numero di letture per una scansione.
 int LidarDriver::get_element_number() const
 {
-	return (DEGREES/resolution)+1;
+	return (DEGREES / resolution) + 1;
 }
 
 // 
@@ -91,36 +93,45 @@ double LidarDriver::get_distance(double angle)
 	}
 	std::vector<double> tmp = matrix[matrix.size() - 1];
 	int i = 0;
-	//nel caso non sia presente l'angolo cercato prendo i due valori attorno al valore cercato
-	int lsinistro=0;
-	int ldestro=0;
-	while(i*resolution <= angle || i < tmp.size()-1){
-		lsinistro = i;
-		ldestro = i + 1;
+	// nel caso non sia presente l'angolo cercato prendo i due valori attorno al valore cercato
+	int left = 0;
+	int right = 1;
+	while (i * resolution <= angle && i < tmp.size() - 1)
+	{
+		left = i;
+		right = i + 1;
 		i++;
-	}	
-	//se ldestro e lsinistro sono uguali(non dovrebbe succedere)
-	if(abs(lsinistro - angle) <= abs(ldestro - angle)){ 
-		return tmp[lsinistro];
 	}
-	else{
-		return tmp[ldestro];
+
+	// se right e left sono uguali(non dovrebbe succedere)
+	if (angle - left*resolution <= right*resolution - angle) 
+	// ho dovuto rimuovere gli abs perche' troncavano tutto a int e 
+	// quindi non funzionavano. Non dovrebbero esserci problemi
+	// perche' left*resolution e' sempre <= angle, mentre right*resolution e' sempre >= angle
+	// sapendo che angle appartiene a [0, 180]
+	{
+		return tmp[left];
+	}
+	else
+	{
+		return tmp[right];
 	}
 }
 
-std::ostream& operator<<(std::ostream& stream, const LidarDriver& ld)
+std::ostream &operator<<(std::ostream &stream, const LidarDriver &ld)
 {
-	if (ld.matrix.empty())
-    {
-        return stream << "Non sono presenti scansioni salvate" << std::endl;
-    }
-
-    stream << "Ultima scansione:" << std::endl;
-    for (double value : ld.matrix.back())
-    {
-        stream << value << " ";
-    }
-    stream << std::endl;
-
-    return stream;
+	if (ld.matrix.size() == 0)
+	{
+		stream << "There are no saved scans" << std::endl;
+	}
+	else
+	{
+		stream << "Last scan: ";
+		for (double value : ld.matrix[ld.matrix.size() - 1])
+		{
+			stream << value << " ";
+		}
+		stream << std::endl;
+	}
+	return stream;
 }
