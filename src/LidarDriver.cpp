@@ -68,7 +68,6 @@ std::vector<double> LidarDriver::get_scan()
 {
     if (matrix.empty())
     {
-		//Aggiungere eccezione
         return std::vector<double>();
     }
 
@@ -90,7 +89,6 @@ void LidarDriver::clear_buffer()
 double LidarDriver::get_distance(double angle)
 {
 	if (matrix.size() == 0){
-		//Aggiungere eccezione
 		return 0;
 	}
 	std::vector<double> tmp = matrix[matrix.size() - 1];
