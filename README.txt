@@ -4,3 +4,7 @@ Progetto intermedio dell'insegnamento "Laboratorio di Programmazione" del CdL In
 Riccardo Zamuner:
 Ho scritto principalmente il main e le funzioni di test. Ho fatto review del codice degli altri 
 con eventuali bug fixing.
+
+Salamone Alessandro:
+Ho scritto la struttura base del file .h e dell'implementazione.
+In particolare i metodi new_scan(), get_scan() e clear_buffer().

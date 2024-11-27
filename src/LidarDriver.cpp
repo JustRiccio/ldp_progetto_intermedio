@@ -68,6 +68,7 @@ std::vector<double> LidarDriver::get_scan()
 {
     if (matrix.empty())
     {
+		//Aggiungere eccezione
 		std::cout << "Non sono presenti scansioni" << std::endl;
         return std::vector<double>();
     }
