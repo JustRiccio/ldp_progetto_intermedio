@@ -8,3 +8,6 @@ con eventuali bug fixing.
 Salamone Alessandro:
 Ho scritto la struttura base del file .h e dell'implementazione.
 In particolare i metodi new_scan(), get_scan() e clear_buffer().
+
+Sperandio Lorenzo:
+Ho implementato parte delle funzioni del file LidarDriver.cpp.

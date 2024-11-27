@@ -63,7 +63,7 @@ int LidarDriver::get_element_number() const
 	return (DEGREES / resolution) + 1;
 }
 
-// 
+// Ritorna l'ultima scansione effetuata e la rimuove dal buffer
 std::vector<double> LidarDriver::get_scan()
 {
     if (matrix.empty())
@@ -86,6 +86,8 @@ void LidarDriver::clear_buffer()
 	matrix.clear();
 }
 
+//Dato un angolo, restituisce la misura corrispondente a tale angolo nell'ultima scansione
+//nel caso non sia presente l'angolo cercato, si prende il valore piu' vicino 
 double LidarDriver::get_distance(double angle)
 {
 	if (matrix.size() == 0){
